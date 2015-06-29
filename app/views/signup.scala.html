@@ -1,0 +1,23 @@
+@(registerForm: Form[UserController.UserIdentification])(errorMessage: String = null)
+@implicitField = @{ helper.FieldConstructor(customInputConstructorTemplate.f) }
+
+@main(Messages("users.signup.title")) {
+
+    @if(errorMessage != null) {
+        <div class="alert alert-danger fade in">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>@Messages("users.error")</strong> @errorMessage
+        </div>
+    }
+
+    <h1>@Messages("users.signup")</h1>
+    @helper.form(routes.UserController.signUpProcessing()) {
+        @helper.inputText(registerForm(UserController.UserIdentification.FIELD_USERNAME), 'placeholder -> Messages("users.username"))
+        @helper.inputPassword(registerForm(UserController.UserIdentification.FIELD_PASSWORD), 'placeholder -> Messages("users.password"))
+        <p>
+            <button type="submit">@Messages("users.signup.button")</button>
+        </p>
+    }
+
+    <a href="@routes.UserController.loginPage()">@Messages("users.login.suggestion")</a>
+}

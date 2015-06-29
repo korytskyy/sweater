@@ -1,0 +1,17 @@
+@(sizeLimit: Int)
+
+@main(Messages("application.name")) {
+    @if(request.username != null) {
+        <a href="@routes.UserController.logoutProcessing()">@Messages("users.logout", request.username)</a>
+    }
+
+    <h1>@Messages("sweats.timeline")</h1>
+
+    <form class="form" id="sweatform" method="post" action="@routes.SweatController.create()">
+        <div class="form-group">
+            <textarea id="sweatArea" maxlength="@sizeLimit" class="form-control" rows="3" style="resize : none"
+                placeholser="@Messages("sweats.invitation", sizeLimit)"></textarea>
+        </div>
+        <button type="submit" class="btn btn-default">@Messages("sweats.button")</button>
+    </form>
+}

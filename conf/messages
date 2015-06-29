@@ -1,0 +1,32 @@
+app.name = Sweater
+
+users.logout = Sweat out ({0})
+
+users.error = Error!
+users.error.notfound = User {0} not found
+
+users.login = Log in
+users.login.button = Sweat in
+users.login.title = Login on Sweater
+users.login.suggestion = Or you can log in
+users.login.invalid = Invalid username or password
+users.login.success = You are successfully logged in
+
+users.signup = Sign up
+users.signup.button = Sweat up
+users.signup.title = Sign up for Sweater
+users.signup.suggestion = Or you can sign up
+users.signup.success = You are successfully signed up
+users.signup.usernametaken = This username is already taken
+
+users.username = Username
+users.password = Password
+
+users.error.correct-form = Please correct the form below
+
+sweats.timeline = Sweat flow
+sweats.error.missing = Content of sweat is missing
+sweats.error.sizelimit = Sweat content is oversized
+sweats.invitation = Sweat your guts out into {0} characters
+sweats.button = Sweat it out
+sweats.created = Sweat is successfully created

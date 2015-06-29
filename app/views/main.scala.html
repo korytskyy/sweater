@@ -1,0 +1,65 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>@title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="@routes.Assets.versioned("bootstrap/css/bootstrap.css")" rel="stylesheet" media="screen"/>
+    </head>
+    <body>
+        <div class="container">
+                <!--Row with two equal columns-->
+            <div class="row">
+                <div class="col-sm-8 col-sm-offset-2">
+                    <div id="messages"></div>
+                    @if(flash.containsKey(Flash.FAILURE)) {
+                        <div class="alert alert-danger fade in">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <strong>@Messages("users.error")</strong> @flash.get(Flash.FAILURE)
+                        </div>
+                    }
+                    @if(flash.containsKey(Flash.SUCCESS)) {
+                        <div class="alert alert-success fade in">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            @flash.get(Flash.SUCCESS)
+                        </div>
+                    }
+
+                    @content
+                </div>
+            </div>
+        </div>
+
+        <script src="@routes.Assets.versioned("javascripts/jquery-1.11.2.min.js")"></script>
+        <script src="@routes.Assets.versioned("bootstrap/js/bootstrap.min.js")"></script>
+
+        <script>
+            $( "#sweatform" ).submit(function( event ) {
+    var sweatContent = $('#sweatArea').val();
+    var sweat = {content: sweatContent};
+    $.ajax({
+        type: $(this).attr("method"),
+        url: $(this).attr("action"),
+        data: JSON.stringify(sweat),
+        contentType: "application/json",
+        dataType: "text",
+        success: function(result,status,xhr){
+            $('#sweatArea').val('');
+            $('#messages').html('<div class="alert alert-success fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
+                            + result + '</div>');
+//        alert("success " + result);
+        },
+        error: function(xhr,status,error) {
+//        alert("error " + xhr.responseText);
+            $('#messages').html('<div class="alert alert-danger fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
+                            +'<strong>@Messages("users.error")</strong> ' + xhr.responseText + '</div>');
+        }
+    });
+    event.preventDefault();
+});
+        </script>
+    </body>
+</html>
