@@ -5,10 +5,14 @@ import models.Sweat;
 import models.User;
 import play.Logger;
 import play.i18n.Messages;
+import play.libs.Comet;
+import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import services.SweatDao;
 import views.html.*;
 
@@ -49,7 +53,7 @@ public class SweatController extends Controller {
             Sweat newSweat = builder.build();
             try {
                 newSweat.save();
-
+                sweatDao.save(newSweat);
             } catch (Exception e) {
                 Logger.error(e.getMessage());
                 return internalServerError(e.getMessage());
@@ -59,6 +63,15 @@ public class SweatController extends Controller {
             session().clear();
             return unauthorized(Messages.get("users.error.notfound"));
         });
-
-        }
     }
+
+    public Result stream() {
+        Comet comet = new Comet("parent.cometMessage") {
+            @Override
+            public void onConnected() {
+                SweatDao.registerChunkOut(this);
+            }
+        };
+        return ok(comet);
+    }
+}
