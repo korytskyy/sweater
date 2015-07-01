@@ -9,15 +9,25 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import services.SweatDao;
 import views.html.*;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-@Security.Authenticated(Secured.class)
+@Singleton
+@Security.Authenticated(SecuredWithCookies.class)
 public class SweatController extends Controller {
+
+    private final SweatDao sweatDao;
+
+    @Inject
+    public SweatController(SweatDao sweatDao) {
+        this.sweatDao = sweatDao;
+    }
 
     public Result timeline() {
         return ok(timeline.render(Sweat.MAX_LENGTH));
@@ -39,6 +49,7 @@ public class SweatController extends Controller {
             Sweat newSweat = builder.build();
             try {
                 newSweat.save();
+
             } catch (Exception e) {
                 Logger.error(e.getMessage());
                 return internalServerError(e.getMessage());

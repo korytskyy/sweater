@@ -11,7 +11,7 @@
     }
 
     <h1>@Messages("users.signup")</h1>
-    @helper.form(routes.UserController.signUpProcessing()) {
+    @helper.form(helper.CSRF(routes.UserController.signUpProcessing())) {
         @helper.inputText(registerForm(UserController.UserIdentification.FIELD_USERNAME), 'placeholder -> Messages("users.username"))
         @helper.inputPassword(registerForm(UserController.UserIdentification.FIELD_PASSWORD), 'placeholder -> Messages("users.password"))
         <p>

@@ -11,7 +11,7 @@
         </div>
     }
     <h1>@Messages("users.login")</h1>
-    @helper.form(routes.UserController.loginProcessing()) {
+    @helper.form(helper.CSRF(routes.UserController.loginProcessing())) {
         @helper.inputText(loginForm(UserController.UserIdentification.FIELD_USERNAME), 'placeholder -> Messages("users.username"))
         @helper.inputPassword(loginForm(UserController.UserIdentification.FIELD_PASSWORD), 'placeholder -> Messages("users.password"))
 

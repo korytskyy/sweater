@@ -2,7 +2,7 @@
 
 @main(Messages("application.name")) {
     @if(request.username != null) {
-        <a href="@routes.UserController.logoutProcessing()">@Messages("users.logout", request.username)</a>
+        <a href="@helper.CSRF(routes.UserController.logoutProcessing())">@Messages("users.logout", request.username)</a>
     }
 
     <h1>@Messages("sweats.timeline")</h1>
