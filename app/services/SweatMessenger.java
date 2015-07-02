@@ -7,6 +7,7 @@ import play.inject.ApplicationLifecycle;
 import play.libs.Comet;
 import play.libs.F;
 import play.libs.Json;
+import play.mvc.WebSocket;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
+// todo consider using actor here
 public class SweatMessenger {
 
     private static final String SWEATS = "sweats";
@@ -25,6 +27,7 @@ public class SweatMessenger {
     private final JedisPool jedisPool;
 
     static Set<Comet> comets = new ConcurrentHashMap<Comet, Boolean>().newKeySet();
+    static Set<WebSocket.Out> websocketOuts = new ConcurrentHashMap<WebSocket.Out, Boolean>().newKeySet();
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -47,6 +50,7 @@ public class SweatMessenger {
         });
     }
 
+
     public void save(Sweat sweat) {
         Logger.debug("SweatMessenger save");
         try (Jedis jedis = jedisPool.getResource();) {
@@ -54,19 +58,28 @@ public class SweatMessenger {
         }
     }
 
-    public static void registerChunkOut(Comet out) {
-        Logger.debug("SweatMessenger register");
+    public static void subscribe(Comet out) {
         comets.add(out);
-        out.onDisconnected(() -> {
-            Logger.debug("SweatMessenger register onDisconnected");
-            comets.remove(out);
-        });
+        out.onDisconnected(()->unsubscribe(out));
+    }
+
+    public static void unsubscribe(Comet out) {
+        comets.remove(out);
+    }
+
+    public static void subscribe(WebSocket.Out out) {
+        websocketOuts.add(out);
+    }
+
+    public static void unsubscribe(WebSocket.Out out) {
+        websocketOuts.remove(out);
     }
 
     class MyListener extends JedisPubSub {
         public void onMessage(String channel, String message) {
             Logger.debug("SweatMessenger MyListener onMessage");
             comets.forEach(c -> c.sendMessage(message));
+            websocketOuts.forEach(c -> c.write(message));
         }
 
         public void onSubscribe(String channel, int subscribedChannels) {

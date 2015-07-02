@@ -1,9 +1,9 @@
 @import java.time.format.DateTimeFormatter
-@(sweatList: List[Sweat], sizeLimit: Int)
+@(sweatList: List[Sweat], sizeLimit: Int)(script: Html)
 
 @main(Messages("application.name")) {
     @if(request.username != null) {
-        <a href="@helper.CSRF(routes.UserController.logoutProcessing())">@Messages("users.logout", request.username)</a>
+        <a href="@helper.CSRF(routes.SecurityController.logoutProcessing())">@Messages("users.logout", request.username)</a>
     }
 
     <div class="page-header">
@@ -13,12 +13,11 @@
     <form class="form" id="sweatform" method="post" action="@routes.SweatController.create()">
         <div class="form-group">
             <textarea id="sweatArea" maxlength="@sizeLimit" class="form-control" rows="3" style="resize : none"
-            placeholser="@Messages("sweats.invitation", sizeLimit)"></textarea>
+            placeholder="@Messages("sweats.invitation", sizeLimit)"></textarea>
         </div>
         <button type="submit" class="btn btn-default">@Messages("sweats.button")</button>
     </form>
     <hr>
-    <iframe style="display : none" id="sweatsIframe" src="@routes.SweatController.stream().unique()"></iframe>
     <div id="sweats" class="list-group">
     @for(sweat <- sweatList) {
         <a href="#" class="list-group-item">
@@ -28,4 +27,37 @@
         </a>
     }
     </div>
+    <script>
+            var pad = function(num) {
+            var s = num+"";
+            while (s.length < 2) s = "0" + s;
+            return s;
+            };
+
+            var date2string = function(date) {
+                //ISO_LOCAL_DATE_TIME
+                var year = date.year;
+                var monthNum = pad(date.monthValue);
+                var day = pad(date.dayOfMonth);
+                var hours = pad(date.hour);
+                var minutes = pad(date.minute);
+                var seconds = pad(date.second);
+                var nano = date.nano.toString().replace(/0+$/,'');
+
+                return year+'-'+monthNum+'-'+day+'T'+hours+':'+minutes+':'+seconds+"."+nano;
+            }
+
+            var message = function(event) {
+                console.log("message");
+                var sweat = JSON.parse(event);
+                var sweatsElement = $('#sweats')
+                $('#sweats').children(":first").before('<a href="#" class="list-group-item">' +
+                        '<h4 class="list-group-item-heading">' + sweat.owner.username + '</h4>' +
+                        '<i class="list-group-item-heading">' + date2string(sweat.creationTime) + '</i>' +
+                        '<p clas="list-group-item-text">' + sweat.content + '</p></a>');
+                console.log(event);
+            }
+    </script>
+
+    @script
 }

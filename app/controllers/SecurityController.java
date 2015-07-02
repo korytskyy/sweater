@@ -6,24 +6,30 @@ import play.data.Form;
 import play.data.validation.Constraints;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import services.AccountManager;
 import services.Authenticator;
+import services.SecurityService;
 import views.html.*;
 
 import javax.inject.Inject;
 
 import static play.data.Form.form;
 
-public class UserController extends Controller {
+public class SecurityController extends Controller {
 
     // workaround for bug in java controllers which must pass optional parameters
     private static final String NO_MESSAGE = null;
 
     private Authenticator authenticator;
 
+    public static User getCurrentUser() {
+        return (User) Http.Context.current().args.get(SecurityService.CONTEXT_USER_KEY);
+    }
+
     @Inject
-    public UserController(Authenticator authenticator) {
+    public SecurityController(Authenticator authenticator) {
         this.authenticator = authenticator;
     }
 
@@ -74,7 +80,7 @@ public class UserController extends Controller {
 
     private void setUpSession(SessionId sessionId, String successMessageKey) {
         session().clear();
-        session(SessionId.sessionKey(), sessionId.sessionId());
+        session(SessionId.sessionKey(), sessionId.sessionValue());
         flash(Flash.SUCCESS, Messages.get(successMessageKey));
     }
 

@@ -3,16 +3,14 @@ package models;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.inject.Singleton;
 import services.PasswordHasher;
 import services.SecurityService;
 
-import javax.inject.Inject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.*;
+import java.util.Optional;
 
 @Entity
 public class User implements SessionId {
@@ -62,7 +60,7 @@ public class User implements SessionId {
     }
 
     @Override
-    public String sessionId() {
+    public String sessionValue() {
         return username;
     }
 

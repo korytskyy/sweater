@@ -14,5 +14,5 @@ public interface SessionId {
         return key;
     }
 
-    public String sessionId();
+    public String sessionValue();
 }

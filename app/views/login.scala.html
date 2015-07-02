@@ -1,4 +1,4 @@
-@(loginForm: Form[UserController.UserId], errorMessage: String = null)
+@(loginForm: Form[SecurityController.UserId], errorMessage: String = null)
 @implicitField = @{
     helper.FieldConstructor(customInputConstructorTemplate.f)
 }
@@ -11,14 +11,14 @@
         </div>
     }
     <h1>@Messages("users.login")</h1>
-    @helper.form(helper.CSRF(routes.UserController.loginProcessing())) {
-        @helper.inputText(loginForm(UserController.UserId.FIELD_USERNAME), 'placeholder -> Messages("users.username"))
-        @helper.inputPassword(loginForm(UserController.UserId.FIELD_PASSWORD), 'placeholder -> Messages("users.password"))
+    @helper.form(helper.CSRF(routes.SecurityController.loginProcessing())) {
+        @helper.inputText(loginForm(SecurityController.UserId.FIELD_USERNAME), 'placeholder -> Messages("users.username"))
+        @helper.inputPassword(loginForm(SecurityController.UserId.FIELD_PASSWORD), 'placeholder -> Messages("users.password"))
 
         <p>
             <button type="submit">@Messages("users.login.button")</button>
         </p>
     }
 
-    <a href="@routes.UserController.signUpPage()">@Messages("users.signup.suggestion")</a>
+    <a href="@routes.SecurityController.signUpPage()">@Messages("users.signup.suggestion")</a>
 }

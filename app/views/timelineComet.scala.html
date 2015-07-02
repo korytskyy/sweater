@@ -1,0 +1,28 @@
+@(sweatList: List[Sweat], sizeLimit: Int)
+
+@timeline(sweatList: List[Sweat], sizeLimit) {
+    <iframe style="display : none" id="sweatsIframe" src="@routes.SweatController.streamComet().unique()"></iframe>
+    <script>
+            //todo CSRF issue
+            $( "#sweatform" ).submit(function( event ) {
+                var sweatContent = $('#sweatArea').val();
+                var sweat = {content: sweatContent};
+                $.ajax({
+                    type: $(this).attr("method"),
+                    url: $(this).attr("action"),
+                    data: JSON.stringify(sweat),
+                    contentType: "application/json",
+                    dataType: "text",
+                    success: function(result,status,xhr){
+                        $('#sweatArea').val('');
+                        console.log(result);
+                    },
+                    error: function(xhr,status,error) {
+                        $('#messages').html('<div class="alert alert-danger fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
+                                +'<strong>@Messages("users.error")</strong> ' + xhr.responseText + '</div>');
+                    }
+                });
+                event.preventDefault();
+            });
+    </script>
+}

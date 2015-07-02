@@ -28,65 +28,13 @@
                         </div>
                     }
 
+                    <script src="@routes.Assets.versioned("javascripts/jquery-1.11.2.min.js")"></script>
                     @content
                 </div>
             </div>
         </div>
 
-        <script src="@routes.Assets.versioned("javascripts/jquery-1.11.2.min.js")"></script>
+
         <script src="@routes.Assets.versioned("bootstrap/js/bootstrap.min.js")"></script>
-
-        <script>
-            $( "#sweatform" ).submit(function( event ) {
-    var sweatContent = $('#sweatArea').val();
-    var sweat = {content: sweatContent
-    };
-    $.ajax({
-        type: $(this).attr("method"),
-        url: $(this).attr("action"),
-        data: JSON.stringify(sweat),
-        contentType: "application/json",
-        dataType: "text",
-        success: function(result,status,xhr){
-            $('#sweatArea').val('');
-            console.log(result);
-        },
-        error: function(xhr,status,error) {
-            $('#messages').html('<div class="alert alert-danger fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
-                            +'<strong>@Messages("users.error")</strong> ' + xhr.responseText + '</div>');
-        }
-    });
-    event.preventDefault();
-});
-
-    var pad = function(num) {
-    var s = num+"";
-    while (s.length < 2) s = "0" + s;
-    return s;
-    };
-
-    var date2string = function(date) {
-        //ISO_LOCAL_DATE_TIME
-        var year = date.year;
-        var monthNum = pad(date.monthValue);
-        var day = pad(date.dayOfMonth);
-        var hours = pad(date.hour);
-        var minutes = pad(date.minute);
-        var seconds = pad(date.second);
-        var nano = date.nano.toString().replace(/0+$/,'');
-
-        return year+'-'+monthNum+'-'+day+'T'+hours+':'+minutes+':'+seconds+"."+nano;
-    }
-
-    var cometMessage = function(event) {
-        var sweat = JSON.parse(event);
-        var sweatsElement = $('#sweats')
-        $('#sweats').children(":first").before('<a href="#" class="list-group-item">' +
-                '<h4 class="list-group-item-heading">' + sweat.owner.username + '</h4>' +
-                '<i class="list-group-item-heading">' + date2string(sweat.creationTime) + '</i>' +
-                '<p clas="list-group-item-text">' + sweat.content + '</p></a>');
-        console.log(event);
-    }
-</script>
     </body>
 </html>

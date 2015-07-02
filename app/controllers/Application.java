@@ -8,7 +8,7 @@ public class Application extends Controller {
     public Result index() {
         keepFlashItem(Flash.SUCCESS);
         keepFlashItem(Flash.FAILURE);
-        return redirect(routes.SweatController.timeline());
+        return redirect(routes.SweatController.timelineCometPage());
     }
 
     /*

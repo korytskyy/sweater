@@ -1,0 +1,29 @@
+@(sweatList: List[Sweat], sizeLimit: Int)
+
+@timeline(sweatList: List[Sweat], sizeLimit) {
+    <script>
+            $(function() {
+                var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+                var socket = new WS("@routes.SweatController.streamWs.webSocketURL(request)");
+                var sendMessage = function(sweatJson) {
+                    console.log("sendMessage");
+                    console.log(sweatJson);
+                    socket.send(sweatJson);
+                };
+                socket.onmessage = message;
+
+                $( "#sweatform" ).submit(function( event ) {
+                    console.log('submit');
+                    var sweatContent = $('#sweatArea').val();
+                    var sweat = {content: sweatContent,
+                                 owner: {
+                                    username: "@request.username"
+                                 }};
+                    sendMessage(JSON.stringify(sweat));
+                    $('#sweatArea').val('');
+                    event.preventDefault();
+                    console.log("submit end");
+            });
+            });
+    </script>
+}
