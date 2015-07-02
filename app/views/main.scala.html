@@ -39,7 +39,8 @@
         <script>
             $( "#sweatform" ).submit(function( event ) {
     var sweatContent = $('#sweatArea').val();
-    var sweat = {content: sweatContent};
+    var sweat = {content: sweatContent
+    };
     $.ajax({
         type: $(this).attr("method"),
         url: $(this).attr("action"),
@@ -48,12 +49,9 @@
         dataType: "text",
         success: function(result,status,xhr){
             $('#sweatArea').val('');
-            $('#messages').html('<div class="alert alert-success fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
-                            + result + '</div>');
-//        alert("success " + result);
+            console.log(result);
         },
         error: function(xhr,status,error) {
-//        alert("error " + xhr.responseText);
             $('#messages').html('<div class="alert alert-danger fade in"><a href="#" class="close" data-dismiss="alert">&times;</a>'
                             +'<strong>@Messages("users.error")</strong> ' + xhr.responseText + '</div>');
         }
@@ -61,9 +59,34 @@
     event.preventDefault();
 });
 
-    var cometMessage = function(event) {
-        $('#sweats').append("<li>" + event + "</li>");
+    var pad = function(num) {
+    var s = num+"";
+    while (s.length < 2) s = "0" + s;
+    return s;
     };
-        </script>
+
+    var date2string = function(date) {
+        //ISO_LOCAL_DATE_TIME
+        var year = date.year;
+        var monthNum = pad(date.monthValue);
+        var day = pad(date.dayOfMonth);
+        var hours = pad(date.hour);
+        var minutes = pad(date.minute);
+        var seconds = pad(date.second);
+        var nano = date.nano.toString().replace(/0+$/,'');
+
+        return year+'-'+monthNum+'-'+day+'T'+hours+':'+minutes+':'+seconds+"."+nano;
+    }
+
+    var cometMessage = function(event) {
+        var sweat = JSON.parse(event);
+        var sweatsElement = $('#sweats')
+        $('#sweats').children(":first").before('<a href="#" class="list-group-item">' +
+                '<h4 class="list-group-item-heading">' + sweat.owner.username + '</h4>' +
+                '<i class="list-group-item-heading">' + date2string(sweat.creationTime) + '</i>' +
+                '<p clas="list-group-item-text">' + sweat.content + '</p></a>');
+        console.log(event);
+    }
+</script>
     </body>
 </html>

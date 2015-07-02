@@ -6,45 +6,44 @@ import models.User;
 import play.Logger;
 import play.i18n.Messages;
 import play.libs.Comet;
-import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import services.SweatDao;
+import services.SweatMessenger;
 import views.html.*;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
-@Singleton
+
 @Security.Authenticated(SecuredWithCookies.class)
 public class SweatController extends Controller {
 
-    private final SweatDao sweatDao;
+    private final SweatMessenger sweatMessenger;
 
     @Inject
-    public SweatController(SweatDao sweatDao) {
-        this.sweatDao = sweatDao;
+    public SweatController(SweatMessenger sweatMessenger) {
+        Logger.debug("Sweat controller construcotr");
+        this.sweatMessenger = sweatMessenger;
     }
 
     public Result timeline() {
-        return ok(timeline.render(Sweat.MAX_LENGTH));
+        Logger.debug("Sweat controller timeline");
+        return ok(timeline.render(Sweat.Dao.findAll(), Sweat.MAX_LENGTH));
     }
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result create() {
+        Logger.debug("Sweat controller create");
         JsonNode json = request().body().asJson();
         String sweatContent = json.findPath("content").textValue();
         if (sweatContent == null) {
             return badRequest(Messages.get("sweats.error.missing"));
         }
-        return User.find(request().username()).map(user -> {
+        return User.Dao.find(request().username()).map(user -> {
             Sweat.Builder builder = new Sweat.Builder(user, sweatContent);
             List<String> errorKeys = builder.validate();
             if (!errorKeys.isEmpty()) {
@@ -52,8 +51,8 @@ public class SweatController extends Controller {
             }
             Sweat newSweat = builder.build();
             try {
-                newSweat.save();
-                sweatDao.save(newSweat);
+                Sweat.Dao.save(newSweat);
+                sweatMessenger.save(newSweat);
             } catch (Exception e) {
                 Logger.error(e.getMessage());
                 return internalServerError(e.getMessage());
@@ -66,12 +65,13 @@ public class SweatController extends Controller {
     }
 
     public Result stream() {
-        Comet comet = new Comet("parent.cometMessage") {
+        Logger.debug("Sweat controller stream");
+
+        return ok(new Comet("parent.cometMessage") {
             @Override
             public void onConnected() {
-                SweatDao.registerChunkOut(this);
+                SweatMessenger.registerChunkOut(this);
             }
-        };
-        return ok(comet);
+        });
     }
 }

@@ -1,14 +1,17 @@
 package controllers;
 
+import models.SessionId;
 import models.User;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
+import services.AccountManager;
+import services.Authenticator;
 import views.html.*;
 
-import java.util.Optional;
+import javax.inject.Inject;
 
 import static play.data.Form.form;
 
@@ -17,28 +20,31 @@ public class UserController extends Controller {
     // workaround for bug in java controllers which must pass optional parameters
     private static final String NO_MESSAGE = null;
 
+    private Authenticator authenticator;
+
+    @Inject
+    public UserController(Authenticator authenticator) {
+        this.authenticator = authenticator;
+    }
+
     public Result loginPage() {
-        return ok(
-                login.render(form(UserIdentification.class), NO_MESSAGE)
-        );
+        return ok(login.render(form(UserId.class), NO_MESSAGE));
     }
 
     public Result loginProcessing() {
-        Form<UserIdentification> boundLoginForm = form(UserIdentification.class).bindFromRequest();
+        try {
+            Form<UserId> boundLoginForm = UserId.bindAndValidateForm();
+            UserId userId = boundLoginForm.get();
 
-        if (boundLoginForm.hasErrors()) {
-            return badRequest(login.render(boundLoginForm, Messages.get("users.error.correct-form")));
+            return authenticator.authenticate(userId.username, userId.password).map(u -> {
+                setUpSession(u, "users.login.success");
+                return redirect(routes.Application.index());
+            }).orElse(
+                    forbidden(login.render(boundLoginForm, Messages.get("users.login.invalid")))
+            );
+        } catch (UserId.FormValidationException e) {
+            return e.getErrorResult();
         }
-
-        UserIdentification userIdentification = boundLoginForm.get();
-
-        return userIdentification.authenticateUser().map(u -> {
-            setUpSession(u);
-            flashSuccess(Messages.get("users.login.success"));
-            return redirect(routes.Application.index());
-        }).orElseGet(() -> {
-            return forbidden(login.render(boundLoginForm, Messages.get("users.login.invalid")));
-        });
     }
 
     public Result logoutProcessing() {
@@ -47,43 +53,32 @@ public class UserController extends Controller {
     }
 
     public Result signUpPage() {
-        return ok(
-                signup.render(form(UserIdentification.class), NO_MESSAGE)
-        );
+        return ok(signup.render(form(UserId.class), NO_MESSAGE));
     }
 
     public Result signUpProcessing() {
-        Form<UserIdentification> boundSignUpForm = form(UserIdentification.class).bindFromRequest();
-
+        Form<UserId> boundSignUpForm = form(UserId.class).bindFromRequest();
         if (boundSignUpForm.hasErrors()) {
             return badRequest(signup.render(boundSignUpForm, Messages.get("users.error.correct-form")));
         }
+        UserId userId = boundSignUpForm.get();
 
-        UserIdentification userIdentification = boundSignUpForm.get();
-
-        if (User.find(userIdentification.username).isPresent()) {
-            return badRequest(signup.render(boundSignUpForm, Messages.get("users.signup.usernametaken")));
+        try {
+            setUpSession(AccountManager.registerNewAccount(userId.username, userId.password), "users.signup.success");
+            return redirect(routes.Application.index());
+        } catch (AccountManager.
+                RegistrationException e) {
+            return badRequest(signup.render(boundSignUpForm, Messages.get(e.getMessage())));
         }
-
-        User user = userIdentification.createUser();
-        user.save();
-
-        setUpSession(user);
-        flashSuccess(Messages.get("users.signup.success"));
-
-        return redirect(routes.Application.index());
     }
 
-    private void flashSuccess(String message) {
-        flash(Flash.SUCCESS, message);
-    }
-
-    private void setUpSession(User u) {
+    private void setUpSession(SessionId sessionId, String successMessageKey) {
         session().clear();
-        session(UserIdentification.FIELD_USERNAME, u.getUsername());
+        session(SessionId.sessionKey(), sessionId.sessionId());
+        flash(Flash.SUCCESS, Messages.get(successMessageKey));
     }
 
-    public static class UserIdentification {
+    public static class UserId {
         public static String FIELD_USERNAME = "username";
         public static String FIELD_PASSWORD = "password";
 
@@ -97,8 +92,24 @@ public class UserController extends Controller {
             return User.create(username, password);
         }
 
-        public Optional<User> authenticateUser() {
-            return User.authenticate(username, password);
+        public static Form<UserId> bindAndValidateForm() throws FormValidationException {
+            Form<UserId> boundLoginForm = form(UserId.class).bindFromRequest();
+            if (boundLoginForm.hasErrors()) {
+                throw new FormValidationException(badRequest(login.render(boundLoginForm, Messages.get("users.error.correct-form"))));
+            }
+            return boundLoginForm;
+        }
+
+        public static class FormValidationException extends Exception {
+            Result errorResult;
+
+            FormValidationException(Result errorResult) {
+                this.errorResult = errorResult;
+            }
+
+            public Result getErrorResult() {
+                return errorResult;
+            }
         }
     }
 }

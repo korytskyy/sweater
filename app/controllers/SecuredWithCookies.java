@@ -7,7 +7,7 @@ import play.mvc.Security;
 public class SecuredWithCookies extends Security.Authenticator {
     @Override
     public String getUsername(Http.Context context) {
-        return context.session().get(UserController.UserIdentification.FIELD_USERNAME);
+        return context.session().get(UserController.UserId.FIELD_USERNAME);
     }
 
     @Override
