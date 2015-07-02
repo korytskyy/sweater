@@ -10,7 +10,20 @@
                     console.log(sweatJson);
                     socket.send(sweatJson);
                 };
-                socket.onmessage = message;
+
+                var messageEvent = function(event) {
+                    console.log("message " + event);
+                    var sweat = JSON.parse(event.data);
+                    console.log(sweat);
+                    var sweatsElement = $('#sweats')
+                    $('#sweats').children(":first").before('<a href="#" class="list-group-item">' +
+                            '<h4 class="list-group-item-heading">' + sweat.owner.username + '</h4>' +
+                            '<i class="list-group-item-heading">' + date2string(sweat.creationTime) + '</i>' +
+                            '<p clas="list-group-item-text">' + sweat.content + '</p></a>');
+                    console.log(event);
+                }
+
+                socket.onmessage = messageEvent;
 
                 $( "#sweatform" ).submit(function( event ) {
                     console.log('submit');

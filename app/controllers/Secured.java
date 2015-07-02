@@ -20,10 +20,13 @@ public class Secured extends Security.Authenticator {
         String username = context.session().get(SessionId.sessionKey());
 
         if (username == null) return null;
-
-        User user = SecurityService.authorizeForSiteAccess(username);
-        context.args.put(SecurityService.CONTEXT_USER_KEY, user);
-        return username;
+        try {
+            User user = SecurityService.authorizeForSiteAccess(username);
+            context.args.put(SecurityService.CONTEXT_USER_KEY, user);
+            return username;
+        } catch (SecurityService.AuthorizationException e) {
+            return null;
+        }
     }
 
     @Override

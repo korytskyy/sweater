@@ -25,7 +25,6 @@ public class User implements SessionId {
     @JsonIgnore
     private String passwordHash;
 
-    //@Inject is not working for some reason, as workaround it'll be instantiated manually
     private static PasswordHasher passwordHasher = new SecurityService();
 
     public static class Dao {
@@ -41,9 +40,6 @@ public class User implements SessionId {
             return user;
         }
     }
-
-//    public User() {
-//    }
 
     private User(String username, String passwordHash) {
         this.username = username;

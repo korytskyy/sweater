@@ -1,18 +1,11 @@
 package services;
 
 import models.SessionId;
-import models.Sweat;
 import models.User;
 import org.mindrot.jbcrypt.BCrypt;
-import play.Logger;
-import play.i18n.Messages;
-import play.mvc.Http;
 
 import javax.inject.Singleton;
-import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.joining;
 
 @Singleton
 public class SecurityService implements PasswordHasher, Authenticator {

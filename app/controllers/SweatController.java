@@ -33,11 +33,11 @@ public class SweatController extends Controller {
         Logger.debug("Sweat controller timelineCometPage");
         // todo implement pagination or analogue feature
         // todo implement additional loading of sweats which were created after this request completion but before WS subscription
-        return ok(timelineComet.render(SweatManager.loadAllSweats(), Sweat.MAX_LENGTH));
+        return ok(timelineComet.render(sweatManager.loadAllSweats(), Sweat.MAX_LENGTH));
     }
 
     public Result timelineWsPage() {
-        return ok(timelineWs.render(SweatManager.loadAllSweats(), Sweat.MAX_LENGTH));
+        return ok(timelineWs.render(sweatManager.loadAllSweats(), Sweat.MAX_LENGTH));
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -77,7 +77,7 @@ public class SweatController extends Controller {
         return ok(new Comet("parent.message") {
             @Override
             public void onConnected() {
-                SweatManager.subscribe(this);
+                sweatManager.subscribe(this);
             }
         });
     }
@@ -117,20 +117,10 @@ public class SweatController extends Controller {
 
                 });
 
-                in.onClose(() -> {
-                    Logger.debug("ws onclose");
-                    try {
-                        sweatManager.unsubscribe(out);
-                    } catch (Exception e) {
-                        Logger.error("Unexpected during unsubscribe");
-                    }
-                });
+                in.onClose(() -> sweatManager.unsubscribe(out));
 
-                try {
-                    sweatManager.subscribe(out);
-                } catch (Exception e) {
-                    Logger.error("Unexpected during subscribe");
-                }
+                sweatManager.subscribe(out);
+
             }
         };
     }

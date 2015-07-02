@@ -58,20 +58,20 @@ public class SweatMessenger {
         }
     }
 
-    public static void subscribe(Comet out) {
+    public void subscribe(Comet out) {
         comets.add(out);
         out.onDisconnected(()->unsubscribe(out));
     }
 
-    public static void unsubscribe(Comet out) {
+    public void unsubscribe(Comet out) {
         comets.remove(out);
     }
 
-    public static void subscribe(WebSocket.Out out) {
+    public void subscribe(WebSocket.Out out) {
         websocketOuts.add(out);
     }
 
-    public static void unsubscribe(WebSocket.Out out) {
+    public void unsubscribe(WebSocket.Out out) {
         websocketOuts.remove(out);
     }
 

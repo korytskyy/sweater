@@ -1,4 +1,35 @@
-This is your new Play application
-=================================
+Requirement is write twitter like application with next functionality:
+- users can register, login and logout
+- user management is scalable
+- users broadcast tweets
+- users reads tweets in real-time
+- basic web ui
+- persistent storage for tweats
 
-This file will be packaged with your application, when using `activator dist`.
+Design decisions and principles during development:
+- Modularity. Functional modules related to authentication, user management and tweet management are loosed coupled, so they may be dedicated as separated independent services in case of necessity.
+- Minimum third-party dependencies for better future maintenance.
+- Had in mind reactive manifest but hasn't implemented a lot :).
+- MVC pattern according to Play architecture.
+- Active record (with Ebean/H2 in memory) for persistence but without exposure outside details of implementation. App is using db via DAO objects (initialy for simplicity they are represented as internal classes of model classes). So it may be substituted by other types of storages.
+- Redis as messaging service with Jedis as java interface implementation.
+- Commet and WebSockets as client layer technologies. 
+- Twitter bootstrap for interface "prototyping".
+- Attention to new java 8 function features.
+- Dependency injections, Builder, Factory and other design patterns.
+
+Prerequisites for testing:
+- run redis on localhost (default port)
+
+Notes:
+- It is very exciting but seems to be endless project, there are a lot of todos in project.
+- There is known bug with authentication (CSRF for comet and web services). It may be fixed by introduction auth token to cookie and transfer it in headers by java script on client side. No some authentication bugs may be appeared during testing.
+- It is assumed that SSL will be setup on proxy level.
+- There is idea to use actors, but I don't know what benefits I can get it for now.
+- I was not able to use Play 2.3.x because typesafe doesn't provide way to download it, all references on older version point to the same activator which install last version of play
+
+Regarding scalability at the moment application is pretty scalable, stateless sessions and redis as messaging system let us scale it horizontally using many nodes. In future authentication service maybe completely extracted.
+
+P.S. tooling for play framework is not great, even inteliij
+
+P.P.S. due to copyright I called my app Sweater, just have a fun as I had when swet over it :)

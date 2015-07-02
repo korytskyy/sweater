@@ -39,25 +39,26 @@ public class SweatManager {
     }
 
     //todo implement async response
-    public static List<Sweat> loadAllSweats() {
+    public List<Sweat> loadAllSweats() {
+
         return Sweat.Dao.findAll();
 
     }
 
-    public static void subscribe(Comet comet) {
-        SweatMessenger.subscribe(comet);
+    public void subscribe(Comet comet) {
+        sweatMessenger.subscribe(comet);
     }
 
-    public static void unsubscribe(Comet comet) {
-        SweatMessenger.unsubscribe(comet);
+    public void unsubscribe(Comet comet) {
+        sweatMessenger.unsubscribe(comet);
     }
 
-    public static void subscribe(WebSocket.Out out) {
-        SweatMessenger.subscribe(out);
+    public void subscribe(WebSocket.Out out) {
+        sweatMessenger.subscribe(out);
     }
 
-    public static void unsubscribe(WebSocket.Out out) {
-        SweatMessenger.unsubscribe(out);
+    public void unsubscribe(WebSocket.Out out) {
+        sweatMessenger.unsubscribe(out);
     }
 
     public static class SweatPersistenceException extends RuntimeException {
