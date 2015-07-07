@@ -54,6 +54,7 @@ public class SweatManager {
     }
 
     public void subscribe(WebSocket.Out out) {
+        Logger.trace("SweatManager.subscribe(ws.out)");
         sweatMessenger.subscribe(out);
     }
 

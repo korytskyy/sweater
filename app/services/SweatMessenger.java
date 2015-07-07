@@ -15,8 +15,10 @@ import redis.clients.jedis.JedisPubSub;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Singleton
 // todo consider using actor here
@@ -26,33 +28,35 @@ public class SweatMessenger {
 
     private final JedisPool jedisPool;
 
+    private AtomicLong outCounter = new AtomicLong();
+
     static Set<Comet> comets = new ConcurrentHashMap<Comet, Boolean>().newKeySet();
-    static Set<WebSocket.Out> websocketOuts = new ConcurrentHashMap<WebSocket.Out, Boolean>().newKeySet();
+    static Map<WebSocket.Out, Long> websocketOuts = new ConcurrentHashMap<>();
 
     ObjectMapper mapper = new ObjectMapper();
 
     @Inject
     public SweatMessenger(ApplicationLifecycle lifecycle) {
-        Logger.debug("SweatMessenger construcotr");
+        Logger.trace("SweatMessenger constructor");
         jedisPool = new JedisPool(new JedisPoolConfig(), "localhost");
 
-        Logger.debug("SweatMessenger subscribing..");
-
-
-        new Thread(() -> jedisPool.getResource().subscribe(new MyListener(), SWEATS)).start();
-
-        Logger.debug("SweatMessenger subscribed");
+        new Thread(() -> {
+            Logger.trace("SweatMessenger subscribing..");
+            jedisPool.getResource().subscribe(new MyListener(), SWEATS);
+            Logger.trace("SweatMessenger subscribed");
+        }).start();
 
         lifecycle.addStopHook(() -> {
-            Logger.debug("SweatMessenger stopHook");
+            Logger.trace("SweatMessenger stopHook");
             jedisPool.destroy();
             return F.Promise.pure(null);
         });
+        Logger.trace("SweatMessenger constructor end");
     }
 
 
     public void save(Sweat sweat) {
-        Logger.debug("SweatMessenger save");
+        Logger.trace("SweatMessenger save");
         try (Jedis jedis = jedisPool.getResource();) {
             jedis.publish(SWEATS, Json.stringify(Json.toJson(sweat)));
         }
@@ -68,7 +72,9 @@ public class SweatMessenger {
     }
 
     public void subscribe(WebSocket.Out out) {
-        websocketOuts.add(out);
+        long id = outCounter.incrementAndGet();
+        Logger.trace("SweatMessenger subscribe ws.out " + id);
+        websocketOuts.put(out, id);
     }
 
     public void unsubscribe(WebSocket.Out out) {
@@ -76,10 +82,19 @@ public class SweatMessenger {
     }
 
     class MyListener extends JedisPubSub {
+        public MyListener() {
+            Logger.trace("MyListener constructor");
+        }
+
         public void onMessage(String channel, String message) {
-            Logger.debug("SweatMessenger MyListener onMessage");
+            Logger.trace("SweatMessenger MyListener onMessage " + message);
             comets.forEach(c -> c.sendMessage(message));
-            websocketOuts.forEach(c -> c.write(message));
+            Logger.trace("Comets notified");
+            websocketOuts.forEach((out, id) -> {
+                Logger.trace("Writing message to out " + id);
+                out.write(message);
+            });
+            Logger.trace("WS notified");
         }
 
         public void onSubscribe(String channel, int subscribedChannels) {

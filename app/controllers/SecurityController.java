@@ -14,9 +14,11 @@ import services.SecurityService;
 import views.html.*;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static play.data.Form.form;
 
+@Singleton
 public class SecurityController extends Controller {
 
     // workaround for bug in java controllers which must pass optional parameters
