@@ -6,21 +6,23 @@
                 var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
                 var socket = new WS("@routes.SweatController.streamWs.webSocketURL(request)");
                 var sendMessage = function(sweatJson) {
-                    console.log("sendMessage");
-                    console.log(sweatJson);
+                    console.log("sendMessage" + sweatJson);
                     socket.send(sweatJson);
                 };
 
                 var messageEvent = function(event) {
-                    console.log("message " + event);
                     var sweat = JSON.parse(event.data);
-                    console.log(sweat);
-                    var sweatsElement = $('#sweats')
-                    $('#sweats').children(":first").before('<a href="#" class="list-group-item">' +
+                    console.log("get message " + JSON.stringify(sweat));
+                    var sweatsElement = $('#sweats');
+                    var nextElementContent = '<a href="#" class="list-group-item">' +
                             '<h4 class="list-group-item-heading">' + sweat.owner.username + '</h4>' +
                             '<i class="list-group-item-heading">' + date2string(sweat.creationTime) + '</i>' +
-                            '<p clas="list-group-item-text">' + sweat.content + '</p></a>');
-                    console.log(event);
+                            '<p clas="list-group-item-text">' + sweat.content + '</p></a>';
+                    if (sweatsElement.children().length > 0) {
+                        sweatsElement.children(":first").before(nextElementContent);
+                    } else {
+                        sweatsElement.append(nextElementContent);
+                    }
                 }
 
                 socket.onmessage = messageEvent;
@@ -35,7 +37,6 @@
                     sendMessage(JSON.stringify(sweat));
                     $('#sweatArea').val('');
                     event.preventDefault();
-                    console.log("submit end");
             });
             });
     </script>
